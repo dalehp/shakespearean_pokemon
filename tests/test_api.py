@@ -3,6 +3,7 @@ import json
 import pytest
 
 from shakespearean_pokemon import create_app
+from shakespearean_pokemon.cache import get_cache
 
 
 @pytest.fixture
@@ -15,6 +16,12 @@ def app():
 def client(app):
     """A test client for the app."""
     return app.test_client()
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    c = get_cache()
+    c._cache.clear()
 
 
 def test_get_pokemon(client, mock_pokeapi, mock_translateapi):
@@ -40,3 +47,11 @@ def test_get_invalid_pokemon(client, mock_pokeapi):
 def test_get_unknown_error(client, mock_pokeapi):
     r = client.get("/test_error")
     assert r.status_code == 500
+
+
+def test_cached_call(client, mock_pokeapi, mock_translateapi):
+    client.get("/charizard").get_json()
+    client.get("/charizard").get_json()
+
+    assert mock_pokeapi.call_count == 1
+    assert mock_translateapi.call_count == 1

@@ -1,10 +1,7 @@
 import pytest
 
-from shakespearean_pokemon.pokemon import (
-    _extract_description,
-    PokemonAPIError,
-    get_pokemon_description,
-)
+from shakespearean_pokemon.exceptions import InvalidPokemonError, UnknownAPIError
+from shakespearean_pokemon.pokemon import _extract_description, get_pokemon_description
 
 
 @pytest.fixture
@@ -37,7 +34,7 @@ def test_extract_description_single_valid(flav_text_entry):
 
 def test_extract_description_single_invalid(flav_text_entry):
     texts = [flav_text_entry(language="jpn", text="test")]
-    with pytest.raises(PokemonAPIError):
+    with pytest.raises(UnknownAPIError):
         _extract_description(texts)
 
 

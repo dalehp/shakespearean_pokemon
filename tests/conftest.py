@@ -6,7 +6,7 @@ def mock_pokeapi(requests_mock):
     with open("tests/pokeapi.json") as f:
         data = f.read()
 
-    requests_mock.get(
+    m1 = requests_mock.get(
         "https://pokeapi.co/api/v2/pokemon-species/charizard", text=data,
     )
     requests_mock.get(
@@ -19,6 +19,7 @@ def mock_pokeapi(requests_mock):
         text="error",
         status_code=504,
     )
+    yield m1
 
 
 @pytest.fixture
@@ -26,7 +27,7 @@ def mock_translateapi(requests_mock):
     with open("tests/translate.json") as f:
         data = f.read()
 
-    requests_mock.post(
+    return requests_mock.post(
         "https://api.funtranslations.com/translate/shakespeare.json", text=data,
     )
 

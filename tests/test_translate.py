@@ -1,9 +1,7 @@
 import pytest
 
-from shakespearean_pokemon.translate import (
-    TranslateAPIError,
-    translate_to_shakespeare,
-)
+from shakespearean_pokemon.exceptions import UnknownAPIError
+from shakespearean_pokemon.translate import translate_to_shakespeare
 
 
 def test_get_translate_success(mock_translateapi):
@@ -15,5 +13,5 @@ def test_get_translate_success(mock_translateapi):
 
 
 def test_get_translate_error(mock_translateapi_error):
-    with pytest.raises(TranslateAPIError):
+    with pytest.raises(UnknownAPIError):
         translate_to_shakespeare("test")

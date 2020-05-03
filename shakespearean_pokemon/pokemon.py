@@ -3,9 +3,7 @@ from typing import Optional, List
 import requests
 from requests.exceptions import ConnectionError
 
-
-class InvalidPokemonError(Exception):
-    pass
+from .exceptions import InvalidPokemonError, TooManyRequestsError, UnknownAPIError
 
 
 class PokemonAPIError(Exception):
@@ -23,8 +21,10 @@ def get_pokemon_description(name: str) -> str:
 
     if r.status_code == 404:
         raise InvalidPokemonError(f"{name} is not a valid pokemon name.")
+    elif r.status_code == 429:
+        raise TooManyRequestsError()
     elif r.status_code != 200:
-        raise PokemonAPIError()
+        raise UnknownAPIError()
 
     data = r.json()
 
@@ -36,4 +36,4 @@ def _extract_description(flavor_texts: List[dict]) -> str:
     for flavor_text in flavor_texts:
         if flavor_text["language"]["name"] == "en":
             return flavor_text["flavor_text"]
-    raise PokemonAPIError("No english flavour text found.")
+    raise UnknownAPIError("No english flavour text found.")

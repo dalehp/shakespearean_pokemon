@@ -1,19 +1,13 @@
 import json
+from contextlib import contextmanager
+from functools import wraps
 
 from flask import Flask, abort
 
-from .pokemon import (
-    InvalidPokemonError,
-    PokemonAPIError,
-    get_pokemon_description,
-)
+from .cache import get_cache
+from .exceptions import InvalidPokemonError, TooManyRequestsError, UnknownAPIError
+from .pokemon import get_pokemon_description
 from .translate import TranslateAPIError, translate_to_shakespeare
-
-
-EXAMPLE_RESPONSE = {
-    "name": "charizard",
-    "description": "pokemon description",
-}
 
 
 def create_app(test_config=None):
@@ -22,24 +16,37 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    @app.route("/<pokemon>")
-    def hello(pokemon):
-        try:
+    @app.route("/<pokemon>", methods=["GET"])
+    def get_pokemon(pokemon):
+        cache = get_cache()
+        cached = cache.get(pokemon)
+        if cached:
+            return {
+                "name": pokemon,
+                "description": cached,
+            }
+
+        with handle_errors():
             description = get_pokemon_description(pokemon)
-        except InvalidPokemonError:
-            abort(404)
-        except PokemonAPIError:
-            # Something wrong with the API call that we don't know how to fix.
-            abort(500)
-
-        try:
             translated = translate_to_shakespeare(description)
-        except TranslateAPIError:
-            abort(500)
 
+        cache.save(pokemon, translated)
         return {
             "name": pokemon,
             "description": translated,
         }
 
     return app
+
+
+@contextmanager
+def handle_errors():
+    try:
+        yield
+    except InvalidPokemonError:
+        abort(404)
+    except TooManyRequestsError:
+        abort(429)
+    except UnknownAPIError:
+        # Something wrong with the API call that we don't know how to fix.
+        abort(500)
