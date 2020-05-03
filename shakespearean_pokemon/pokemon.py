@@ -24,7 +24,7 @@ def get_pokemon_description(name: str) -> str:
     if r.status_code == 404:
         raise InvalidPokemonError(f"{name} is not a valid pokemon name.")
     elif r.status_code != 200:
-        raise PokemonAPIError
+        raise PokemonAPIError()
 
     data = r.json()
 

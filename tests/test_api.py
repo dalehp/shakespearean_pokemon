@@ -17,15 +17,17 @@ def client(app):
     return app.test_client()
 
 
-def test_get_pokemon(client, mock_pokeapi):
+def test_get_pokemon(client, mock_pokeapi, mock_translateapi):
     data = client.get("/charizard").get_json()
     assert data == {
         "name": "charizard",
         "description": (
-            "Charizard flies around the sky in search of powerful opponents.\n"
-            "It breathes fire of such great heat that it melts anything.\n"
-            "However, it never turns its fiery breath on any opponent\n"
-            "weaker than itself."
+            (
+                "Charizard flies 'round the sky in search of powerful opponents. 't "
+                "breathes fire of such most wondrous heat yond 't melts aught. "
+                "However,  't nev'r turns its fiery breath on any opponent weaker than "
+                "itself."
+            )
         ),
     }
 

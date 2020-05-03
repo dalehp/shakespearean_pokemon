@@ -7,6 +7,7 @@ from .pokemon import (
     PokemonAPIError,
     get_pokemon_description,
 )
+from .translate import TranslateAPIError, translate_to_shakespeare
 
 
 EXAMPLE_RESPONSE = {
@@ -31,9 +32,14 @@ def create_app(test_config=None):
             # Something wrong with the API call that we don't know how to fix.
             abort(500)
 
+        try:
+            translated = translate_to_shakespeare(description)
+        except TranslateAPIError:
+            abort(500)
+
         return {
             "name": pokemon,
-            "description": description,
+            "description": translated,
         }
 
     return app

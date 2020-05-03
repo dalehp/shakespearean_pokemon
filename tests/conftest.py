@@ -19,3 +19,25 @@ def mock_pokeapi(requests_mock):
         text="error",
         status_code=504,
     )
+
+
+@pytest.fixture
+def mock_translateapi(requests_mock):
+    with open("tests/translate.json") as f:
+        data = f.read()
+
+    requests_mock.post(
+        "https://api.funtranslations.com/translate/shakespeare.json", text=data,
+    )
+
+
+@pytest.fixture
+def mock_translateapi_error(requests_mock):
+    with open("tests/translate.json") as f:
+        data = f.read()
+
+    requests_mock.post(
+        "https://api.funtranslations.com/translate/shakespeare.json",
+        text="error",
+        status_code=503,
+    )
